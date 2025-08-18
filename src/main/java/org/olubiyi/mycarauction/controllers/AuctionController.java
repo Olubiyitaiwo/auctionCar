@@ -41,7 +41,7 @@ public class AuctionController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<AuctionResponseDto> deleteAuctions(@PathVariable String id) {
         AuctionResponseDto response = auctionservice.deleteAuction(id);
         return ResponseEntity.ok(response);
