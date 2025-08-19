@@ -7,6 +7,7 @@ import lombok.Data;
 @Table(name = "items")
 @Data
 public class Items {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -18,7 +19,7 @@ public class Items {
     private Double mileage;
     private String imageUrl;
 
-    @OneToOne
-    @JoinColumn(name = "auction_id", referencedColumnName = "id", unique = true)
+    // 👇 Mapped by "item" in Auction
+    @OneToOne(mappedBy = "item")
     private Auction auction;
 }

@@ -29,7 +29,7 @@ public class AuctionServiceImpl implements Auctionservice {
 
         return new AuctionResponseDto(
                 item != null ? item.getId() : null,
-                auction.getStatus().name(),
+                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction retrieved successfully"
         );
     }
@@ -41,13 +41,11 @@ public class AuctionServiceImpl implements Auctionservice {
         return auctions.stream()
                 .map(auction -> new AuctionResponseDto(
                         auction.getItem() != null ? auction.getItem().getId() : null,
-                        auction.getStatus().name(),
+                        auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                         "Auction retrieved successfully"
                 ))
-                .toList(); // Java 16+, or use Collectors.toList() for older versions
+                .toList();
     }
-
-
 
     @Override
     public AuctionResponseDto getAuctionByItemId(String itemId) {
@@ -59,7 +57,7 @@ public class AuctionServiceImpl implements Auctionservice {
 
         return new AuctionResponseDto(
                 item.getId(),
-                auction.getStatus().name(),
+                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction retrieved successfully by item ID"
         );
     }
@@ -69,58 +67,63 @@ public class AuctionServiceImpl implements Auctionservice {
         Auction auction = new Auction();
 
         LocalDateTime now = LocalDateTime.now();
-
         auction.setCreatedAt(now);
         auction.setReservedPrice(auctionRequestDto.getReservedPrice());
         auction.setSeller(auctionRequestDto.getSeller());
-        auction.setWinner(auctionRequestDto.getSeller());
+        auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
+
+        // link auction to item
+        Items item = itemsRepository.findById(auctionRequestDto.getItemId())
+                .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
+
+        auction.setItem(item);
 
         auctionRepository.save(auction);
 
         return new AuctionResponseDto(
-                auction.getItem() != null ? auction.getItem().getId() : null,
-                auction.getStatus().name(),
+                item.getId(),
+                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction created successfully"
         );
     }
+
     @Override
     public AuctionResponseDto updateAuction(String auctionId, AuctionRequestDto auctionRequestDto) {
-        Auction auction = new Auction();
-
-        auctionRepository.findById(auctionId)
+        Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
         auction.setUpdatedAt(LocalDateTime.now());
         auction.setReservedPrice(auctionRequestDto.getReservedPrice());
         auction.setSeller(auctionRequestDto.getSeller());
-        auction.setWinner(auctionRequestDto.getSeller());
+        auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
+
+        // If item is updated
+        if (auctionRequestDto.getItemId() != null) {
+            Items item = itemsRepository.findById(auctionRequestDto.getItemId())
+                    .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
+            auction.setItem(item);
+        }
 
         auctionRepository.save(auction);
 
         return new AuctionResponseDto(
                 auction.getItem() != null ? auction.getItem().getId() : null,
-                auction.getStatus().name(),
+                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction updated successfully"
         );
     }
 
     @Override
     public AuctionResponseDto deleteAuction(String auctionId) {
-        Auction auction = new Auction();
-
-        auctionRepository.findById(auctionId)
+        Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
         auctionRepository.delete(auction);
 
         return new AuctionResponseDto(
                 auction.getItem() != null ? auction.getItem().getId() : null,
-                auction.getStatus().name(),
+                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Deleted successfully"
         );
     }
-
-
-    // You can add more methods here like createAuction, updateAuction, deleteAuction, etc.
-
 }
