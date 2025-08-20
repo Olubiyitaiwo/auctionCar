@@ -3,6 +3,8 @@ package org.olubiyi.mycarauction.data.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "items")
 @Data
@@ -10,7 +12,7 @@ public class Items {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     private String make;
     private String model;

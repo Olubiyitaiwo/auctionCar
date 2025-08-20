@@ -1,13 +1,16 @@
-package org.olubiyi.mycarauction.dtos.request;
+package org.olubiyi.mycarauction.dtos.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
-@NoArgsConstructor       // Needed for JSON deserialization
-@AllArgsConstructor      // Handy if you want to build manually
-public class ItemRequestDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ItemResponseDto {
+    private UUID id;
     private String make;
     private String model;
     private int year;

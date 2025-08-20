@@ -5,6 +5,7 @@ import org.olubiyi.mycarauction.dtos.request.AuctionRequestDto;
 import org.olubiyi.mycarauction.dtos.response.AuctionResponseDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface Auctionservice {
 
@@ -12,7 +13,7 @@ public interface Auctionservice {
 
     List<AuctionResponseDto> getAllAuctions();
 
-    AuctionResponseDto getAuctionByItemId(String itemId);
+    AuctionResponseDto getAuctionByItemId(UUID itemId);
 
     AuctionResponseDto createAuction(AuctionRequestDto auctionRequestDto);
 

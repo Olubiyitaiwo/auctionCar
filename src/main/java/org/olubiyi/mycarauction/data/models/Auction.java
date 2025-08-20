@@ -5,6 +5,7 @@ import lombok.Data;
 import org.olubiyi.mycarauction.data.enums.Status;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "auctions")
@@ -13,9 +14,9 @@ public class Auction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
-    private int reservedPrice;
+    private double reservedPrice;
     private String seller;
     private String winner;
     private double soldPrice;

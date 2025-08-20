@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -22,14 +23,15 @@ public class AuctionServiceImpl implements Auctionservice {
 
     @Override
     public AuctionResponseDto getAuctionById(String id) {
-        Auction auction = auctionRepository.findById(id)
+        UUID uuid = UUID.fromString(id); // ✅ convert
+        Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + id));
 
         Items item = auction.getItem();
 
         return new AuctionResponseDto(
-                item != null ? item.getId() : null,
-                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
+                (item != null) ? item.getId().toString() : null,
+                (auction.getStatus() != null) ? auction.getStatus().name() : "UNKNOWN",
                 "Auction retrieved successfully"
         );
     }
@@ -40,7 +42,7 @@ public class AuctionServiceImpl implements Auctionservice {
 
         return auctions.stream()
                 .map(auction -> new AuctionResponseDto(
-                        auction.getItem() != null ? auction.getItem().getId() : null,
+                        auction.getItem() != null ? auction.getItem().getId().toString() : null,
                         auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                         "Auction retrieved successfully"
                 ))
@@ -48,7 +50,7 @@ public class AuctionServiceImpl implements Auctionservice {
     }
 
     @Override
-    public AuctionResponseDto getAuctionByItemId(String itemId) {
+    public AuctionResponseDto getAuctionByItemId(UUID itemId) {
         Items item = itemsRepository.findById(itemId)
                 .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + itemId));
 
@@ -56,7 +58,7 @@ public class AuctionServiceImpl implements Auctionservice {
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found for item ID: " + itemId));
 
         return new AuctionResponseDto(
-                item.getId(),
+                item.getId().toString(),
                 auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction retrieved successfully by item ID"
         );
@@ -73,7 +75,7 @@ public class AuctionServiceImpl implements Auctionservice {
         auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
 
         // link auction to item
-        Items item = itemsRepository.findById(auctionRequestDto.getItemId())
+        Items item = itemsRepository.findById(auctionRequestDto.getItemId()) // auctionRequestDto.getItemId must be UUID
                 .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
 
         auction.setItem(item);
@@ -81,7 +83,7 @@ public class AuctionServiceImpl implements Auctionservice {
         auctionRepository.save(auction);
 
         return new AuctionResponseDto(
-                item.getId(),
+                item.getId().toString(),
                 auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction created successfully"
         );
@@ -89,7 +91,8 @@ public class AuctionServiceImpl implements Auctionservice {
 
     @Override
     public AuctionResponseDto updateAuction(String auctionId, AuctionRequestDto auctionRequestDto) {
-        Auction auction = auctionRepository.findById(auctionId)
+        UUID uuid = UUID.fromString(auctionId); // ✅ convert
+        Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
         auction.setUpdatedAt(LocalDateTime.now());
@@ -99,7 +102,7 @@ public class AuctionServiceImpl implements Auctionservice {
 
         // If item is updated
         if (auctionRequestDto.getItemId() != null) {
-            Items item = itemsRepository.findById(auctionRequestDto.getItemId())
+            Items item = itemsRepository.findById(auctionRequestDto.getItemId()) // must already be UUID
                     .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
             auction.setItem(item);
         }
@@ -107,7 +110,7 @@ public class AuctionServiceImpl implements Auctionservice {
         auctionRepository.save(auction);
 
         return new AuctionResponseDto(
-                auction.getItem() != null ? auction.getItem().getId() : null,
+                auction.getItem() != null ? auction.getItem().getId().toString() : null,
                 auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Auction updated successfully"
         );
@@ -115,13 +118,14 @@ public class AuctionServiceImpl implements Auctionservice {
 
     @Override
     public AuctionResponseDto deleteAuction(String auctionId) {
-        Auction auction = auctionRepository.findById(auctionId)
+        UUID uuid = UUID.fromString(auctionId); // ✅ convert
+        Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
         auctionRepository.delete(auction);
 
         return new AuctionResponseDto(
-                auction.getItem() != null ? auction.getItem().getId() : null,
+                auction.getItem() != null ? auction.getItem().getId().toString() : null,
                 auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
                 "Deleted successfully"
         );
