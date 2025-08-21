@@ -35,11 +35,17 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<ItemResponseDto>> getAllItems(@RequestParam(required = false) List<String> ids) {
         List<Items> items = itemService.getAllItems();
+
         if (ids != null && !ids.isEmpty()) {
+            List<UUID> uuidList = ids.stream()
+                    .map(UUID::fromString)
+                    .toList();
+
             items = items.stream()
-                    .filter(item -> ids.contains(item.getId()))
+                    .filter(item -> uuidList.contains(item.getId()))
                     .toList();
         }
+
         List<ItemResponseDto> dtoList = items.stream()
                 .map(item -> new ItemResponseDto(
                         item.getId(),
@@ -51,23 +57,10 @@ public class ItemController {
                         item.getImageUrl()
                 ))
                 .toList();
+
         return ResponseEntity.ok(dtoList);
     }
 
-    @GetMapping("/by-make")
-    public ResponseEntity<ItemResponseDto> getItemByMake(@RequestParam String make) {
-        Items item = itemService.getItemByMake(make);
-        ItemResponseDto response = new ItemResponseDto(
-                item.getId(),
-                item.getMake(),
-                item.getModel(),
-                item.getYear(),
-                item.getColor(),
-                item.getMileage(),
-                item.getImageUrl()
-        );
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/by-model")
     public ResponseEntity<ItemResponseDto> getItemByModel(@RequestParam String model) {

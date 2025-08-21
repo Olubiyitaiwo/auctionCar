@@ -1,6 +1,7 @@
 package org.olubiyi.mycarauction.service;
 
 import lombok.AllArgsConstructor;
+import org.olubiyi.mycarauction.data.enums.Status;
 import org.olubiyi.mycarauction.data.models.Auction;
 import org.olubiyi.mycarauction.data.models.Items;
 import org.olubiyi.mycarauction.data.repositories.AuctionRepository;
@@ -23,7 +24,7 @@ public class AuctionServiceImpl implements Auctionservice {
 
     @Override
     public AuctionResponseDto getAuctionById(String id) {
-        UUID uuid = UUID.fromString(id); // ✅ convert
+        UUID uuid = UUID.fromString(id); // ✅ convert String -> UUID
         Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + id));
 
@@ -74,24 +75,27 @@ public class AuctionServiceImpl implements Auctionservice {
         auction.setSeller(auctionRequestDto.getSeller());
         auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
 
-        // link auction to item
-        Items item = itemsRepository.findById(auctionRequestDto.getItemId()) // auctionRequestDto.getItemId must be UUID
-                .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
+        // Set default status
+        auction.setStatus(Status.Live);
+
+        // Ensure item exists
+        Items item = itemsRepository.findById(UUID.fromString(auctionRequestDto.getItemId()))
+                .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + auctionRequestDto.getItemId()));
 
         auction.setItem(item);
-
         auctionRepository.save(auction);
 
         return new AuctionResponseDto(
                 item.getId().toString(),
-                auction.getStatus() != null ? auction.getStatus().name() : "UNKNOWN",
+                auction.getStatus().name(),
                 "Auction created successfully"
         );
     }
 
+
     @Override
     public AuctionResponseDto updateAuction(String auctionId, AuctionRequestDto auctionRequestDto) {
-        UUID uuid = UUID.fromString(auctionId); // ✅ convert
+        UUID uuid = UUID.fromString(auctionId); // ✅ convert String -> UUID
         Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
@@ -102,7 +106,8 @@ public class AuctionServiceImpl implements Auctionservice {
 
         // If item is updated
         if (auctionRequestDto.getItemId() != null) {
-            Items item = itemsRepository.findById(auctionRequestDto.getItemId()) // must already be UUID
+            UUID itemUuid = UUID.fromString(auctionRequestDto.getItemId()); // ✅ convert
+            Items item = itemsRepository.findById(itemUuid)
                     .orElseThrow(() -> new AuctionNotFoundException("Item not found with ID: " + auctionRequestDto.getItemId()));
             auction.setItem(item);
         }
