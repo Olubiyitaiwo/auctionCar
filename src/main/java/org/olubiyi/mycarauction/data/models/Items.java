@@ -1,27 +1,33 @@
 package org.olubiyi.mycarauction.data.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "items")
-@Data
+@Getter
+@Setter
 public class Items {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
     private UUID id;
 
+    @Column(nullable = false)
     private String make;
-    private String model;
-    private int year;
-    private String color;
-    private Double mileage;
-    private String imageUrl;
 
-    // 👇 Mapped by "item" in Auction
-    @OneToOne(mappedBy = "item")
-    private Auction auction;
+    @Column(nullable = false)
+    private String model;
+
+    @Column(nullable = false)
+    private int year;
+
+    private String color;
+
+    private double mileage;
+
+    private String imageUrl;
 }

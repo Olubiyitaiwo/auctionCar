@@ -70,7 +70,7 @@ public class AuctionServiceImpl implements Auctionservice {
         Auction auction = new Auction();
 
         LocalDateTime now = LocalDateTime.now();
-        auction.setCreatedAt(now);
+        auction.setStartTime(now);
         auction.setReservedPrice(auctionRequestDto.getReservedPrice());
         auction.setSeller(auctionRequestDto.getSeller());
         auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
@@ -99,7 +99,7 @@ public class AuctionServiceImpl implements Auctionservice {
         Auction auction = auctionRepository.findById(uuid)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with ID: " + auctionId));
 
-        auction.setUpdatedAt(LocalDateTime.now());
+        auction.setStartTime(LocalDateTime.now());
         auction.setReservedPrice(auctionRequestDto.getReservedPrice());
         auction.setSeller(auctionRequestDto.getSeller());
         auction.setCurrentPrice(auctionRequestDto.getStartingPrice());
