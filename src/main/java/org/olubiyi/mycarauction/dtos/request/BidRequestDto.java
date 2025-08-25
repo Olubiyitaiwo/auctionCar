@@ -1,17 +1,15 @@
 package org.olubiyi.mycarauction.dtos.request;
 
-import lombok.*;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class BidRequestDto {
-    private UUID itemId;
+    private UUID userId;      // ✅ who is bidding
+    private UUID auctionId;   // ✅ auction being bid on
     private BigDecimal amount;
-    private String bidderName;
 }
+
 

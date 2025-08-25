@@ -1,10 +1,12 @@
 package org.olubiyi.mycarauction.service;
 
-
 import lombok.RequiredArgsConstructor;
+import org.olubiyi.mycarauction.data.models.Auction;
 import org.olubiyi.mycarauction.data.models.Bid;
 import org.olubiyi.mycarauction.data.models.User;
+import org.olubiyi.mycarauction.data.repositories.AuctionRepository;
 import org.olubiyi.mycarauction.data.repositories.BidRepository;
+import org.olubiyi.mycarauction.data.repositories.UserRepository;
 import org.olubiyi.mycarauction.dtos.request.BidRequestDto;
 import org.olubiyi.mycarauction.dtos.response.BidResponseDto;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,48 +20,77 @@ import java.util.UUID;
 public class BidServiceImpl implements BidService {
 
     private final BidRepository bidRepository;
-    private final JavaMailSender mailSender;
-
+    private final UserRepository userRepository;
+    private final AuctionRepository auctionRepository;
+    private final JavaMailSender mailSender;   // ✅ email sender
 
     @Override
     public BidResponseDto createBid(BidRequestDto request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Auction auction = auctionRepository.findById(request.getAuctionId())
+                .orElseThrow(() -> new RuntimeException("Auction not found"));
+
         Bid bid = Bid.builder()
-                .itemId(request.getItemId())
+                .user(user)
+                .auction(auction)
                 .amount(request.getAmount())
-                .bidderName(request.getBidderName())
                 .build();
 
-        Bid savedBid = bidRepository.save(bid);
+        bidRepository.save(bid);
 
-        return BidResponseDto.builder()
-                .id(savedBid.getId())
-                .itemId(savedBid.getItemId())
-                .amount(savedBid.getAmount())
-                .bidderName(savedBid.getBidderName())
-                .build();
+        // ✅ Send instant email
+        sendBidConfirmationEmail(user, auction, bid);
+
+        return new BidResponseDto(
+                bid.getId(),
+                user.getId(),
+                auction.getId(),
+                bid.getAmount(),
+                "✅ Bid placed successfully. Email sent!"
+        );
     }
 
     @Override
     public BidResponseDto getBidById(UUID id) {
         Bid bid = bidRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Bid not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Bid not found"));
 
-        return BidResponseDto.builder()
-                .id(bid.getId())
-                .itemId(bid.getItemId())
-                .amount(bid.getAmount())
-                .bidderName(bid.getBidderName())
-                .build();
+        return new BidResponseDto(
+                bid.getId(),
+                bid.getUser().getId(),
+                bid.getAuction().getId(),
+                bid.getAmount(),
+                "✅ Bid retrieved successfully"
+        );
     }
+
     @Override
-    public void sendBidConfirmationEmail(User user, Bid bid) {
+    public void sendBidConfirmationEmail(User user, Auction auction, Bid bid) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
-        message.setSubject("✅ Your Bid Was Placed");
-        message.setText("Hello " + user.getFirstName() + ",\n\n" +
-                "Your bid of ₦" + bid.getAmount() + " has been placed successfully on auction " + bid.getAuctionId() + ".\n\n" +
-                "Thank you for using MyCarAuction!");
+        message.setSubject("Bid Confirmation Auction " + auction.getId());
+        message.setText("Hello " + user.getFirstName() + ",\n\n"
+                + "Your bid of $" + bid.getAmount() + " has been placed successfully "
+                + "on auction: " + auction.getId() + ".\n\n"
+                + "Thank you for using MyCarAuction!\n");
+
         mailSender.send(message);
     }
-}
 
+    @Override
+    public BidResponseDto getHighestBid(UUID auctionId) {
+        Bid bid = bidRepository.findTopByAuctionIdOrderByAmountDesc(auctionId)
+                .orElseThrow(() -> new RuntimeException("No bids found for this auction"));
+
+        return new BidResponseDto(
+                bid.getId(),
+                bid.getUser().getId(),
+                bid.getAuction().getId(),
+                bid.getAmount(),
+                "✅ Highest bid retrieved successfully"
+        );
+    }
+
+}

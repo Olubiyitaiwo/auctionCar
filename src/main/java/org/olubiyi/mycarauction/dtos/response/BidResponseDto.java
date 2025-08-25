@@ -1,19 +1,21 @@
 package org.olubiyi.mycarauction.dtos.response;
 
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Builder
 public class BidResponseDto {
-    private UUID id;
-    private UUID itemId;
+    private UUID bidId;
+    private UUID userId;
+    private UUID auctionId;
     private BigDecimal amount;
-    private String bidderName;
+    private String message;
 }
+
 

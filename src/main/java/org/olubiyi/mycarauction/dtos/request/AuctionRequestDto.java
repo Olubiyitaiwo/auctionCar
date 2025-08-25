@@ -2,11 +2,13 @@ package org.olubiyi.mycarauction.dtos.request;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class AuctionRequestDto {
-    private double reservedPrice;
+    private BigDecimal reservedPrice;
     private String seller;
-    private double startingPrice;
+    private BigDecimal startingPrice;
     private String itemId;   // 👈 changed to String (UUID)
 }
 

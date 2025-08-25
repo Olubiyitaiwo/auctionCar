@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.olubiyi.mycarauction.data.enums.Status;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -26,9 +27,9 @@ public class Auction {
 
     private LocalDateTime endTime;
 
-    private double reservedPrice;
+    private BigDecimal reservedPrice;
 
-    private double currentPrice;
+    private BigDecimal currentPrice;
 
     private String seller;
 
