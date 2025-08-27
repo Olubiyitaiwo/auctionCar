@@ -9,15 +9,9 @@ import java.util.UUID;
 
 public interface Auctionservice {
 
-    AuctionResponseDto getAuctionById(String id);
-
-    List<AuctionResponseDto> getAllAuctions();
-
-    AuctionResponseDto getAuctionByItemId(UUID itemId);
-
     AuctionResponseDto createAuction(AuctionRequestDto auctionRequestDto);
 
-    AuctionResponseDto updateAuction(String auctionId, AuctionRequestDto auctionRequestDto);
+    void closeAuction(UUID auctionId);
 
-    AuctionResponseDto deleteAuction(String auctionId);
+    AuctionResponseDto updateAuction(String auctionId, AuctionRequestDto auctionRequestDto);
 }

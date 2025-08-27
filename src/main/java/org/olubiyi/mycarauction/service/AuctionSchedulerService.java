@@ -26,27 +26,29 @@ public class AuctionSchedulerService {
 
     @Scheduled(fixedRate = 60000) // runs every 1 min
     public void closeExpiredAuctions() {
+        // find all auctions that are still live but already past endTime
         List<Auction> expiredAuctions = auctionRepository
                 .findByStatusAndEndTimeBefore(Status.Live, LocalDateTime.now());
 
         for (Auction auction : expiredAuctions) {
             Optional<Bid> highestBid = bidRepository
-                    .findTopByAuctionIdOrderByAmountDesc(auction.getId());
+                    .findTopByAuctionOrderByAmountDesc(auction);
 
             if (highestBid.isPresent()) {
                 Bid bid = highestBid.get();
                 User winner = bid.getUser();
 
-                // send email to winner
-                sendWinnerEmail(winner.getEmail(), auction);
-
-                // send email to seller
-                sendSellerEmail(auction.getSeller(), winner, auction);
-
-                // mark auction as closed
-                auction.setStatus(Status.Closed);
+                // ✅ set winner in auction
+                auction.setWinner(winner);
                 auction.setCurrentPrice(bid.getAmount());
+                auction.setStatus(Status.Closed);
+
                 auctionRepository.save(auction);
+
+                // send emails
+                sendWinnerEmail(winner.getEmail(), auction);
+                sendSellerEmail(auction.getSeller().getEmail(), winner, auction);
+
             } else {
                 // no bids placed -> just close auction
                 auction.setStatus(Status.Closed);
@@ -59,8 +61,8 @@ public class AuctionSchedulerService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("🎉 Congratulations! You won the auction");
-        message.setText("Dear Bidder,\n\n" +
-                "Congratulations! You won the auction for item: " + auction.getItem().getMake() +
+        message.setText("Dear " + auction.getWinner().getFirstName() + ",\n\n" +
+                "Congratulations! You won the auction for item: " + auction.getItem().getMake() + " " + auction.getItem().getModel() +
                 " at a final price of $" + auction.getCurrentPrice() + ".\n\n" +
                 "Please contact the seller to complete the transaction.\n\n" +
                 "Best regards,\nCar Auction Team");
@@ -72,8 +74,8 @@ public class AuctionSchedulerService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(sellerEmail);
         message.setSubject("📢 Your item has been sold!");
-        message.setText("Hello,\n\n" +
-                "Your item: " + auction.getItem().getMake() +
+        message.setText("Hello " + auction.getSeller().getFirstName() + ",\n\n" +
+                "Your item: " + auction.getItem().getMake() + " " + auction.getItem().getModel() +
                 " has been successfully auctioned.\n\n" +
                 "Winner: " + winner.getFirstName() + " " + winner.getLastName() +
                 "\nEmail: " + winner.getEmail() +

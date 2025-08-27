@@ -14,4 +14,5 @@ public interface AuctionRepository extends JpaRepository<Auction, UUID> {
     Optional<Auction> findByItem(Items item);
 
     List<Auction> findByStatusAndEndTimeBefore(Status status, LocalDateTime now);
+
 }

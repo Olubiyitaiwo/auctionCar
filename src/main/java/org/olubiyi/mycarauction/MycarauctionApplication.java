@@ -13,12 +13,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @SpringBootApplication
+@EnableScheduling
 public class MycarauctionApplication {
 
     public static void main(String[] args) {
@@ -32,17 +33,23 @@ public class MycarauctionApplication {
                                    BidRepository bidRepository) {
         return args -> {
 
-            // ✅ Seed users
+            // ✅ Seed user
+            User user;
             if (userRepository.count() == 0) {
-                User user = new User();
+                user = new User();
                 user.setFirstName("Taiwo");
                 user.setLastName("Olu");
                 user.setEmail("taiwo@example.com");
-                user.setPassword("password123");
+                user.setPassword("password123"); // TODO: encode with PasswordEncoder
                 user.setPhone("08012345678");
+                user.setUsername("Twinners");
                 userRepository.save(user);
                 System.out.println("✅ Test user inserted!");
+            } else {
+                user = userRepository.findAll().get(0);
             }
+
+            final User seededUser = user;
 
             // ✅ Seed items
             if (itemsRepository.count() == 0) {
@@ -65,16 +72,17 @@ public class MycarauctionApplication {
                 System.out.println("✅ Test items inserted!");
             }
 
-            User user = userRepository.findAll().get(0); // For bids
-
-            // ✅ Seed auctions
+            // ✅ Seed auctions with all required fields
             if (auctionRepository.count() == 0) {
                 itemsRepository.findAll().forEach(item -> {
                     Auction auction = new Auction();
-                    auction.setId(UUID.randomUUID());
                     auction.setItem(item);
+                    auction.setSeller(seededUser);                  // Must have a seller
                     auction.setStartTime(LocalDateTime.now());
                     auction.setEndTime(LocalDateTime.now().plusDays(3));
+                    auction.setReservedPrice(BigDecimal.valueOf(2000));
+                    auction.setCurrentPrice(BigDecimal.valueOf(1500));
+                    auction.setStatus(org.olubiyi.mycarauction.data.enums.Status.Live); // Must have status
                     auctionRepository.save(auction);
                 });
                 System.out.println("✅ Test auctions inserted!");
@@ -82,15 +90,17 @@ public class MycarauctionApplication {
 
             // ✅ Seed bids
             if (bidRepository.count() == 0) {
-                itemsRepository.findAll().forEach(item -> {
+                auctionRepository.findAll().forEach(auction -> {
                     Bid bid = new Bid();
                     bid.setAmount(BigDecimal.valueOf(1500 + Math.random() * 1000));
-                    bid.setItem(item);
-                    bid.setUser(user);
+                    bid.setUser(seededUser);
+                    bid.setAuction(auction);
                     bidRepository.save(bid);
                 });
                 System.out.println("✅ Test bids inserted!");
             }
+
         };
     }
 }
+

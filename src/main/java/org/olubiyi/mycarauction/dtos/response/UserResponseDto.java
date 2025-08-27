@@ -1,15 +1,17 @@
 package org.olubiyi.mycarauction.dtos.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class UserResponseDto {
-    private UUID userId;
+    private Object id;  // can be UUID or String depending on your need
+    private String email;
     private String firstName;
     private String lastName;
-    private String email;
-    private String message;
+    private String username;
+    private String phone;
 }

@@ -17,15 +17,15 @@ public class AuctionController {
 
     private final Auctionservice auctionservice;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AuctionResponseDto> getAuctionById(@PathVariable String id) {
-        return ResponseEntity.ok(auctionservice.getAuctionById(id));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<AuctionResponseDto> getAuctionById(@PathVariable String id) {
+//        return ResponseEntity.ok(auctionservice.getAuctionById(id));
+//    }
 
-    @GetMapping
-    public ResponseEntity<List<AuctionResponseDto>> getAllAuctions() {
-        return ResponseEntity.ok(auctionservice.getAllAuctions());
-    }
+//    @GetMapping
+//    public ResponseEntity<List<AuctionResponseDto>> getAllAuctions() {
+//        return ResponseEntity.ok(auctionservice.getAllAuctions());
+//    }
 
     @PostMapping
     public ResponseEntity<?> createAuction(@RequestBody AuctionRequestDto auctionRequestDto) {
@@ -50,13 +50,13 @@ public class AuctionController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAuction(@PathVariable String id) {
-        try {
-            AuctionResponseDto response = auctionservice.deleteAuction(id);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<?> deleteAuction(@PathVariable String id) {
+//        try {
+//            AuctionResponseDto response = auctionservice.deleteAuction(id);
+//            return ResponseEntity.ok(response);
+//        } catch (IllegalArgumentException ex) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+//        }
+//    }
 }

@@ -1,14 +1,17 @@
 package org.olubiyi.mycarauction.dtos.request;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 public class AuctionRequestDto {
+    private String itemId;
+    private String sellerId; // ✅ seller is a User, not a String
     private BigDecimal reservedPrice;
-    private String seller;
     private BigDecimal startingPrice;
-    private String itemId;   // 👈 changed to String (UUID)
 }
+
 

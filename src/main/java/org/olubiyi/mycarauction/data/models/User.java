@@ -28,5 +28,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    public String username;
+
     private String phone;
 }

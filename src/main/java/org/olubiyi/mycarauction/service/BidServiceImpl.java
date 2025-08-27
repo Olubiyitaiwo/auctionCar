@@ -80,8 +80,8 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public BidResponseDto getHighestBid(UUID auctionId) {
-        Bid bid = bidRepository.findTopByAuctionIdOrderByAmountDesc(auctionId)
+    public BidResponseDto getHighestBid(Auction auctionId) {
+        Bid bid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionId)
                 .orElseThrow(() -> new RuntimeException("No bids found for this auction"));
 
         return new BidResponseDto(

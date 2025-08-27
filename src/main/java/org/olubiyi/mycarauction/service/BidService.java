@@ -15,6 +15,6 @@ public interface BidService {
 
     void sendBidConfirmationEmail(User user, Auction auction, Bid bid);
 
-    BidResponseDto getHighestBid(UUID auctionId);
+    BidResponseDto getHighestBid(Auction auctionId);
 }
 

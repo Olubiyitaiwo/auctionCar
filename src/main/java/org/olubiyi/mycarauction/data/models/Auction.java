@@ -24,15 +24,19 @@ public class Auction {
     private Items item;
 
     private LocalDateTime startTime;
-
     private LocalDateTime endTime;
 
     private BigDecimal reservedPrice;
-
     private BigDecimal currentPrice;
 
-    private String seller;
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;   // ✅ seller is now a User
+
+    @ManyToOne
+    @JoinColumn(name = "winner_id")
+    private User winner;   // ✅ winner is also a User
 
     @Enumerated(EnumType.STRING)
-    private Status status; // Status is an enum (e.g., Live, Closed)
+    private Status status; // e.g. Live, Closed
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -22,15 +23,18 @@ public class Bid {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "auction_id", nullable = false)
+    private Auction auction;   // ✅ The auction this bid belongs to
 
     @ManyToOne
-    @JoinColumn(name = "auction_id")
-    private Auction auction;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;   // ✅ The bidder
 
-    private BigDecimal amount;
+    private BigDecimal amount;  // ✅ Bid amount
+
+    private LocalDateTime timestamp; // ✅ When the bid was placed
 }
+
 
 
 
