@@ -27,27 +27,34 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Items getItemByMake(String make) {
-        return itemsRepository.findByMake(make)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with name:" + make));
+    public List<Items> getItemByMake(String make) {
+        List<Items> items = itemsRepository.findByMake(make);
+        if (items.isEmpty()) {
+            throw new ItemNotFoundException("No items found with make: " + make);
+        }
+        return items;
     }
 
     @Override
-    public Items getItemByModel(String model) {
-        return itemsRepository.findByModel(model)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with name:" + model));
+    public List<Items> getItemByModel(String model) {
+        List<Items> items = itemsRepository.findByModel(model);
+        if (items.isEmpty()) {
+            throw new ItemNotFoundException("No items found with model: " + model);
+        }
+        return items;
     }
 
     @Override
-    public Items getItemByMakeAndModel(String make, String model) {
-        return itemsRepository.findByMakeAndModel(make, model)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with name:" + make + " and model:" + model));
+    public List<Items> getItemByMakeAndModel(String make, String model) {
+        List<Items> items = itemsRepository.findByMakeAndModel(make, model);
+        if (items.isEmpty()) {
+            throw new ItemNotFoundException("No items found with make: " + make + " and model: " + model);
+        }
+        return items;
     }
 
     @Override
     public Items createItem(Items item) {
         return itemsRepository.save(item);
     }
-
 }
-

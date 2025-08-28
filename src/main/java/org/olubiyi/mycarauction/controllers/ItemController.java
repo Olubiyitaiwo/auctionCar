@@ -17,8 +17,29 @@ import java.util.UUID;
 public class ItemController {
     private final ItemService itemService;
 
+    @GetMapping
+    public ResponseEntity<List<ItemResponseDto>> getAllItems(@RequestParam(required = false) List<String> ids) {
+        List<Items> items = itemService.getAllItems();
+        if (ids != null && !ids.isEmpty()) {
+            List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
+            items = items.stream().filter(item -> uuidList.contains(item.getId())).toList();
+        }
+        List<ItemResponseDto> dtoList = items.stream()
+                .map(item -> new ItemResponseDto(
+                        item.getId(),
+                        item.getMake(),
+                        item.getModel(),
+                        item.getYear(),
+                        item.getColor(),
+                        item.getMileage(),
+                        item.getImageUrl()
+                ))
+                .toList();
+        return ResponseEntity.ok(dtoList);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ItemResponseDto> getItemsById(@PathVariable UUID id) {
+    public ResponseEntity<ItemResponseDto> getItemById(@PathVariable UUID id) {
         Items item = itemService.getItemById(id);
         ItemResponseDto dto = new ItemResponseDto(
                 item.getId(),
@@ -32,21 +53,10 @@ public class ItemController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> getAllItems(@RequestParam(required = false) List<String> ids) {
-        List<Items> items = itemService.getAllItems();
-
-        if (ids != null && !ids.isEmpty()) {
-            List<UUID> uuidList = ids.stream()
-                    .map(UUID::fromString)
-                    .toList();
-
-            items = items.stream()
-                    .filter(item -> uuidList.contains(item.getId()))
-                    .toList();
-        }
-
-        List<ItemResponseDto> dtoList = items.stream()
+    @GetMapping("/by-make")
+    public ResponseEntity<List<ItemResponseDto>> getItemsByMake(@RequestParam String make) {
+        List<Items> items = itemService.getItemByMake(make);
+        List<ItemResponseDto> response = items.stream()
                 .map(item -> new ItemResponseDto(
                         item.getId(),
                         item.getMake(),
@@ -57,45 +67,46 @@ public class ItemController {
                         item.getImageUrl()
                 ))
                 .toList();
-
-        return ResponseEntity.ok(dtoList);
-    }
-
-
-    @GetMapping("/by-model")
-    public ResponseEntity<ItemResponseDto> getItemByModel(@RequestParam String model) {
-        Items item = itemService.getItemByModel(model);
-        ItemResponseDto response = new ItemResponseDto(
-                item.getId(),
-                item.getMake(),
-                item.getModel(),
-                item.getYear(),
-                item.getColor(),
-                item.getMileage(),
-                item.getImageUrl()
-        );
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/by-model-and-by-make")
-    public ResponseEntity<ItemResponseDto> getItemByMakeAndModel(@RequestParam String make, @RequestParam String model) {
-        Items item = itemService.getItemByMakeAndModel(make, model);
-        ItemResponseDto response = new ItemResponseDto(
-                item.getId(),
-                item.getMake(),
-                item.getModel(),
-                item.getYear(),
-                item.getColor(),
-                item.getMileage(),
-                item.getImageUrl()
-        );
+    @GetMapping("/by-model")
+    public ResponseEntity<List<ItemResponseDto>> getItemsByModel(@RequestParam String model) {
+        List<Items> items = itemService.getItemByModel(model);
+        List<ItemResponseDto> response = items.stream()
+                .map(item -> new ItemResponseDto(
+                        item.getId(),
+                        item.getMake(),
+                        item.getModel(),
+                        item.getYear(),
+                        item.getColor(),
+                        item.getMileage(),
+                        item.getImageUrl()
+                ))
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/by-make-and-by-model")
+    public ResponseEntity<List<ItemResponseDto>> getItemsByMakeAndModel(@RequestParam String make,
+                                                                        @RequestParam String model) {
+        List<Items> items = itemService.getItemByMakeAndModel(make, model);
+        List<ItemResponseDto> response = items.stream()
+                .map(item -> new ItemResponseDto(
+                        item.getId(),
+                        item.getMake(),
+                        item.getModel(),
+                        item.getYear(),
+                        item.getColor(),
+                        item.getMileage(),
+                        item.getImageUrl()
+                ))
+                .toList();
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ItemResponseDto> createAuctionItem(@RequestBody ItemRequestDto request) {
-        System.out.println("Received request: " + request);
-
+    public ResponseEntity<ItemResponseDto> createItem(@RequestBody ItemRequestDto request) {
         Items item = new Items();
         item.setMake(request.getMake());
         item.setModel(request.getModel());
@@ -118,5 +129,4 @@ public class ItemController {
 
         return ResponseEntity.ok(response);
     }
-
 }

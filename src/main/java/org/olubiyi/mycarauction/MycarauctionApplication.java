@@ -14,6 +14,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,23 +31,25 @@ public class MycarauctionApplication {
     CommandLineRunner seedDatabase(UserRepository userRepository,
                                    ItemsRepository itemsRepository,
                                    AuctionRepository auctionRepository,
-                                   BidRepository bidRepository) {
+                                   BidRepository bidRepository,
+                                   PasswordEncoder passwordEncoder) {
         return args -> {
 
-            // ✅ Seed user
-            User user;
-            if (userRepository.count() == 0) {
+            // ✅ Seed user safely
+            User user = userRepository.findByEmail("taiwo@example.com").orElse(null);
+
+            if (user == null) {
                 user = new User();
                 user.setFirstName("Taiwo");
                 user.setLastName("Olu");
                 user.setEmail("taiwo@example.com");
-                user.setPassword("password123"); // TODO: encode with PasswordEncoder
+                user.setPassword(passwordEncoder.encode("password123")); // hash password
                 user.setPhone("08012345678");
                 user.setUsername("Twinners");
                 userRepository.save(user);
                 System.out.println("✅ Test user inserted!");
             } else {
-                user = userRepository.findAll().get(0);
+                System.out.println("ℹ️ User already exists, skipping insertion.");
             }
 
             final User seededUser = user;
@@ -72,17 +75,13 @@ public class MycarauctionApplication {
                 System.out.println("✅ Test items inserted!");
             }
 
-            // ✅ Seed auctions with all required fields
+            // ✅ Seed auctions
             if (auctionRepository.count() == 0) {
                 itemsRepository.findAll().forEach(item -> {
                     Auction auction = new Auction();
                     auction.setItem(item);
-                    auction.setSeller(seededUser);                  // Must have a seller
                     auction.setStartTime(LocalDateTime.now());
                     auction.setEndTime(LocalDateTime.now().plusDays(3));
-                    auction.setReservedPrice(BigDecimal.valueOf(2000));
-                    auction.setCurrentPrice(BigDecimal.valueOf(1500));
-                    auction.setStatus(org.olubiyi.mycarauction.data.enums.Status.Live); // Must have status
                     auctionRepository.save(auction);
                 });
                 System.out.println("✅ Test auctions inserted!");
@@ -99,8 +98,11 @@ public class MycarauctionApplication {
                 });
                 System.out.println("✅ Test bids inserted!");
             }
-
         };
     }
+
+
+
 }
+
 
